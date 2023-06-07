@@ -4,3 +4,6 @@ gen.json
 data
 node_modules
 build
+caramell-blockchain/w3js/
+target/
+.env

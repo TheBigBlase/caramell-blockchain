@@ -1,4 +1,4 @@
-FROM hyperledger/besu
+FROM hyperledger/besu:develop
 USER root
 
 RUN mkdir -p /node/data
@@ -21,4 +21,4 @@ ENTRYPOINT besu --data-path=$DATA_PATH --genesis-file=$GENESIS_FILE\
 	--rpc-http-api=$RPC_HTTP_API --rpc-http-host=$RPC_HTTP_HOST\
 	--rpc-http-port=$RPC_HTTP_PORT --rpc-http-cors-origins=$RPC_CORS_ORG\
 	--p2p-port=$P2P_PORT --bootnodes=$BOOTNODES\
-	--host-allowlist=$HOST_ALLOW_LIST $RPC_HTTP_ENABLED $NO_GAS
+	--host-allowlist=$HOST_ALLOW_LIST $RPC_HTTP_ENABLED

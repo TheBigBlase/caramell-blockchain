@@ -1,7 +1,7 @@
-let storeData = artifacts.require("storeData");
+let store = artifacts.require("storeData");
 
 module.exports = function(deployer) {
-	deployer.deploy(storeData, 5);
+	deployer.deploy(store);
 
   // Use deployer to state migration tasks.
 };
