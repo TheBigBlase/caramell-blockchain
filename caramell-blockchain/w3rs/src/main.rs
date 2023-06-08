@@ -15,8 +15,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     const RPC_URL: &str = "http://localhost:8545";
     let provider = Provider::<Http>::try_from(RPC_URL)?;
 
-    let contract_addr: H160 = "0xaBD6FFaDb463b730Ea1906a7F70EE276EDB697c3".parse()?;
-    let wallet: LocalWallet = "0x0097c6884fc3b1af44890df35467e5846347b5ceefc45fa4fa1941eac28ef362"
+    let contract_addr: H160 = "0xBB73fF5d6d569e9df513C9003D091DF1237Eec92".parse()?;
+    let wallet: LocalWallet = "0xe53606ac2b1545536d7f545b55ffa96548ee10ff16941076a027f3089804ea7c"
         .parse::<LocalWallet>()?;//local node1
     //TODO regen node keys, this is a private key lol
     //also use env file / toml

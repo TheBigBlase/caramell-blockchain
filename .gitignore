@@ -8,3 +8,5 @@ caramell-blockchain/w3js/
 target/
 .env
 caramell-blockchain/w3rs/package*
+files/Node*/data/
+genesis.json

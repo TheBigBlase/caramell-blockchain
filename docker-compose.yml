@@ -3,7 +3,7 @@ services:
 
   node1:
     build:
-      context: ./
+      context: ./files
       dockerfile: ./Node-1/Dockerfile
     ports:
       - 8545:8545
@@ -14,7 +14,7 @@ services:
 
   node2:
     build:
-      context: ./
+      context: ./files
       dockerfile: ./Node-2/Dockerfile
     ports:
       - "8546:8456"
@@ -25,7 +25,7 @@ services:
 
   node3:
     build:
-      context: ./
+      context: ./files
       dockerfile: ./Node-3/Dockerfile
     ports:
       - "8547:8457"
@@ -36,7 +36,7 @@ services:
 
   node4:
     build:
-      context: ./
+      context: ./files
       dockerfile: ./Node-4/Dockerfile
     ports:
       - "8548:8458"
