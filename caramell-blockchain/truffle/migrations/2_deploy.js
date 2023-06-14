@@ -1,7 +1,8 @@
-let store = artifacts.require("storeData");
+let clientFactory = artifacts.require("clientFactory");
+//let client = artifacts.require("client");
 
 module.exports = function(deployer) {
-	deployer.deploy(store);
+	deployer.deploy(clientFactory);
 
   // Use deployer to state migration tasks.
 };

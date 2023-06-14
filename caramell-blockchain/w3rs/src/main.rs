@@ -1,42 +1,74 @@
-use std::sync::Arc;
+use ethers::providers::Ws;
+use ethers::signers::{LocalWallet, Signer, Wallet};
+use ethers::types::{BlockNumber, H160, U256};
+use ethers_middleware::core::k256::ecdsa::SigningKey;
+use ethers_middleware::SignerMiddleware;
+use ethers_providers::{Middleware, Provider};
 use serde_json;
+use std::sync::Arc;
+use utils::contracts::client_contract::clientContract;
 
-use ethers::prelude::*;
 use tokio;
+use utils;
+use utils::contracts::client_factory::{clientFactory, ContractCreatedFilter};
 
-abigen!(
-    StoreData,
-    "./contracts/storeData.json",
-    event_derives(serde::Deserialize, serde::Serialize)
-);
+use utils::blockchain::get_address_contract_from_event;
+
+use utils::contracts::shared_types::Data;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    const RPC_URL: &str = "http://localhost:8545";
-    let provider = Provider::<Http>::try_from(RPC_URL)?;
+    let config = utils::load_toml("caramell-blockchain/caramell-blockchain/w3rs");
 
-    let contract_addr: H160 = "0xBB73fF5d6d569e9df513C9003D091DF1237Eec92".parse()?;
-    let wallet: LocalWallet = "0xe53606ac2b1545536d7f545b55ffa96548ee10ff16941076a027f3089804ea7c"
-        .parse::<LocalWallet>()?;//local node1
-    //TODO regen node keys, this is a private key lol
-    //also use env file / toml
+    let rpc_url = config.blockchain.clone().unwrap().rpc_url_ws;
+    let mut contract_addr: H160 = config.blockchain.clone().unwrap().contract_addr.parse()?;
+    let wallet: LocalWallet = config
+        .blockchain
+        .clone()
+        .unwrap()
+        .wallet_key
+        .parse::<LocalWallet>()?; //local node1
 
-    println!("{:?}", provider.get_accounts().await?);
+    let provider: Provider<Ws> = Provider::<Ws>::connect(rpc_url).await?;
+
     let client = SignerMiddleware::new(provider.clone(), wallet.clone().with_chain_id(1337 as u64));
 
-    let contract = StoreData::new(contract_addr.clone(), Arc::new(client.clone()));
+    let contract = clientFactory::new(contract_addr.clone(), Arc::new(client.clone()));
+    println!("{:?}", contract.get_client().call().await?);
 
-    println!("{}", contract.get_all_client().call().await?);
+    let evt = contract.events();
 
-    let timestamp = provider.get_block(BlockNumber::Latest).await?.unwrap().timestamp;
-    let data: Data = Data{
-        name:String::from("first data"), data: U256::zero(),
-        time_created: timestamp, time_to_store: U256::zero()
+    contract_addr = {
+        contract.new_client().send().await?;
+        get_address_contract_from_event::<
+            SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>,
+            ContractCreatedFilter,
+        >(evt, wallet.address())
+    }
+    .await
+    .unwrap();
+
+    println!("contract addr {:?}", contract_addr);
+
+    let timestamp = provider
+        .get_block(BlockNumber::Latest)
+        .await?
+        .unwrap()
+        .timestamp;
+
+    let data: Data = Data {
+        name: String::from("first data"),
+        data: U256::zero(),
+        time_created: timestamp,
+        time_to_store: U256::zero(),
     };
 
-    let res = contract.client_add_data(wallet.address().to_string(), data).send().await?.await?;
+    let client = clientContract::new(contract_addr.clone(), Arc::new(client.clone()));
+
+    let res = client.add_data(data).send().await?.await?;
+
     println!("{:?}", serde_json::to_string(&res));
-    println!("{}", contract.get_all_client().call().await?);
+    println!("{}", client.get_all_data().call().await?);
 
     Ok(())
 }

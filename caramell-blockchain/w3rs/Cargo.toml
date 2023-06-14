@@ -6,7 +6,17 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ethers = { version = "2.0.7", features = ["abigen-offline"] }
+utils = { path = "../../../utils"}
+ethers = { version = "2.0.7", features = ["abigen-offline", "ethers-solc"] }
+ethers-middleware = "2.0.7"
+ethers-providers = "2.0.7"
+ethers_provider = "0.2.2"
 serde = "1.0.163"
 serde_json = "1.0.96"
 tokio = { version = "1.28.2", features = ["macros", "rt-multi-thread"] }
+
+[blockchain]
+rpc_url_http = "http://localhost:8545"
+rpc_url_ws = "ws://localhost:8645"
+contract_addr = "0x2fC732B8Cf710cf48087eFe5d994D1BB015735A2"
+wallet_key = "EXAMPLE THIS IS A PRIVATE KEY DONT PUSH THIS"

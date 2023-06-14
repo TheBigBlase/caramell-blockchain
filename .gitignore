@@ -10,3 +10,4 @@ target/
 caramell-blockchain/w3rs/package*
 files/Node*/data/
 genesis.json
+w3rs/contracts/

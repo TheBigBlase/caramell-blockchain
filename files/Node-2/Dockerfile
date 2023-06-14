@@ -9,8 +9,10 @@ COPY ./Node-2/data/key* /node/data
 ENV GENESIS_FILE=/node/genesis.json
 ENV RPC_HTTP_API=EEA,WEB3,ETH,NET,TRACE,DEBUG,ADMIN,TXPOOL,QBFT 
 ENV RPC_HTTP_ENABLED=--rpc-http-enabled
+ENV RPC_WS_ENABLED=--rpc-ws-enabled
 ENV RPC_HTTP_HOST=172.30.1.2
 ENV RPC_HTTP_PORT=8546
+ENV RPC_WS_PORT=8646
 ENV P2P_PORT=30304
 ENV NO_GAS=--min-gas-price=0
 ENV HOST_ALLOW_LIST="*"
@@ -23,4 +25,5 @@ ENTRYPOINT besu --data-path=$DATA_PATH --genesis-file=$GENESIS_FILE\
 	--rpc-http-api=$RPC_HTTP_API --rpc-http-host=$RPC_HTTP_HOST\
 	--rpc-http-port=$RPC_HTTP_PORT --rpc-http-cors-origins=$RPC_CORS_ORG\
 	--p2p-port=$P2P_PORT --bootnodes=$BOOTNODES\
-	--host-allowlist=$HOST_ALLOW_LIST $RPC_HTTP_ENABLED
+	--host-allowlist=$HOST_ALLOW_LIST $RPC_HTTP_ENABLED\
+	$RPC_WS_ENABLED --rpc-ws-port=$RPC_WS_PORT
