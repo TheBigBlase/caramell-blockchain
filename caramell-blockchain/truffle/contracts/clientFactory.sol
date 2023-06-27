@@ -12,7 +12,7 @@ contract clientFactory {
 		address payable clientContractAddress = clientList[msg.sender];
 
 		if(clientContractAddress == address(0)) {
-			clientContract c = new clientContract(msg.sender);
+			clientContract c = new clientContract(msg.sender, address(this));
 			clientContractAddress = payable(address(c));
 			clientList[msg.sender] = clientContractAddress;
 		}
