@@ -98,6 +98,7 @@ contract clientContract {
 	}
 
 	function indent(uint8 i) internal pure returns(string memory){
+		// idk if its more efficient xd
 		string memory res = "";
 		for( ; bytes(res).length < i ; ) {
 			res = string.concat(res, "\t");
