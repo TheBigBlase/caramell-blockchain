@@ -66,6 +66,12 @@ contract clientContract {
 		c.data[hashData] = _data;
 	}
 
+	function getData(string calldata name) isClient hasNewContract view public returns(Data memory) {
+		bytes32 hashData = keccak256(bytes(name));
+
+		return c.data[hashData];
+	}
+
 	function setNewContract(address a) isStorer external {
 		_newContract = a;
 	}
