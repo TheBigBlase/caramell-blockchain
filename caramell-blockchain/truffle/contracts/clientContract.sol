@@ -8,20 +8,23 @@ struct Data {
 	uint256 timeToStore;
 }
 
+struct Data_accounting {
+	Data data;
+	int clientReadNumber;
+	int ownerReadNumber;
+}
+
 // using mapping of hashs directly, since we store keys in list.
 // this way we are more mem efficient
-struct Client {
+contract clientContract {
 	mapping (bytes32 => Data) data;
 	string name;
 	bytes32[] keyList;
-}
 
-contract clientContract {
 	address _ownerClient;
 	address _ownerStorer;
 	address _newContract = address(0);
 
-	Client c;
 	constructor(address client, address storer) {
 		_ownerClient = client;
 		_ownerStorer = storer;
@@ -49,27 +52,27 @@ contract clientContract {
 
 	function clearClient() internal {
 		//delete every key
-		for(uint i = 0 ; i < c.keyList.length ; i++) {
-			bytes32 addrData = c.keyList[i];
-			delete c.data[addrData];
+		for(uint i = 0 ; i < keyList.length ; i++) {
+			bytes32 addrData = keyList[i];
+			delete data[addrData];
 		}
 	}
 
-	function addData(Data memory _data) isClient hasNewContract public {
+	function addData(Data memory _data) isStorer hasNewContract public {
 		bytes32 hashData = keccak256(bytes(_data.name));
 		//check if data key exists
 		_data.timeCreated = block.timestamp;
-		if(c.data[hashData].timeCreated == 0) {
-			c.keyList.push(hashData);
+		if(data[hashData].timeCreated == 0) {
+			keyList.push(hashData);
 		}
 
-		c.data[hashData] = _data;
+		data[hashData] = _data;
 	}
 
-	function getData(string calldata name) isClient hasNewContract view public returns(Data memory) {
-		bytes32 hashData = keccak256(bytes(name));
+	function getData(string calldata data_name) isClient hasNewContract view public returns(Data memory) {
+		bytes32 hashData = keccak256(bytes(data_name));
 
-		return c.data[hashData];
+		return data[hashData];
 	}
 
 	function setNewContract(address a) isStorer external {
@@ -79,13 +82,13 @@ contract clientContract {
 	function getAllDataString() hasNewContract isClient external view returns(string memory){
 		//get all data from a client, and format in json like fashion
 		string memory res = "[\n";
-		for(uint k = 0 ; k < c.keyList.length ; k++) {
-			bytes32 idx = c.keyList[k];
+		for(uint k = 0 ; k < keyList.length ; k++) {
+			bytes32 idx = keyList[k];
 			res = string.concat(res, indent(1), "{\n");
 			res = string.concat(res, indent(2));
-			res = string.concat(res, '"dataName":"', c.data[idx].name, '",\n');
+			res = string.concat(res, '"dataName":"', data[idx].name, '",\n');
 			res = string.concat(res, indent(2));
-			res = string.concat(res, '"dataValue":"', uint2str(c.data[idx].data), '"\n');
+			res = string.concat(res, '"dataValue":"', uint2str(data[idx].data), '"\n');
 			res = string.concat(res, indent(1), "},\n");
 		}
 		res = string.concat(res, "]");
@@ -94,11 +97,11 @@ contract clientContract {
 
 	function getAllData() hasNewContract isClient external view returns(Data[] memory){
 		//get all data from a client, and format in json like fashion
-		uint len = c.keyList.length;
+		uint len = keyList.length;
 		Data[] memory res = new Data[](len);
-		for(uint k = 0 ; k < c.keyList.length ; k++) {
-			bytes32 idx = c.keyList[k];
-			res[k] = c.data[idx];
+		for(uint k = 0 ; k < keyList.length ; k++) {
+			bytes32 idx = keyList[k];
+			res[k] = data[idx];
 		}
 		return res;
 	}
