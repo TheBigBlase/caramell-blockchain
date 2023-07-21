@@ -5,22 +5,22 @@ use ethers_middleware::core::k256::ecdsa::SigningKey;
 use ethers_middleware::SignerMiddleware;
 use ethers_providers::Provider;
 use std::sync::Arc;
-use utils::contracts::client_contract::clientContract;
+use utils::contracts::client_contract::ClientContract;
 
 use tokio;
 use utils;
-use utils::contracts::client_factory::{clientFactory, ContractCreatedFilter};
+use utils::contracts::client_factory::{ClientFactory, ContractCreatedFilter};
 
 use utils::blockchain::{create_data, get_address_contract_from_event};
 
-use utils::contracts::shared_types::Data;
+use utils::contracts::client_contract::Data;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = utils::load_toml("caramell-blockchain/caramell-blockchain/w3rs");
 
     let rpc_url = config.blockchain.clone().unwrap().rpc_url_ws;
-    let mut contract_addr: H160 = config.blockchain.clone().unwrap().contract_addr.parse()?;
+    let mut contract_addr: H160 = config.blockchain.clone().unwrap().contract_addr;
     let wallet: LocalWallet = config
         .blockchain
         .clone()
@@ -33,7 +33,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let middleware =
         SignerMiddleware::new(provider.clone(), wallet.clone().with_chain_id(1337 as u64));
 
-    let factory = clientFactory::new(contract_addr.clone(), Arc::new(middleware.clone()));
+    let factory = ClientFactory::new(contract_addr.clone(), Arc::new(middleware.clone()));
     println!("{:?}", factory.get_client().call().await?);
 
     let evt = factory.events();
@@ -49,13 +49,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("contract addr {:?}", contract_addr);
 
-    let client = clientContract::new(contract_addr.clone(), Arc::new(middleware.clone()));
+    let client = ClientContract::new(contract_addr.clone(), Arc::new(middleware.clone()));
 
     let data: Data = create_data("polyphia", U256::zero());
 
-    let res = client.add_data(data).send().await?.await?;
-
-    println!("{:?}", res);
+    let tx = client.add_data(data);
+    let tx = tx.send().await;
+    match tx {
+        Ok(res) => { let res = res.await.unwrap(); println!("{:?}", res)},
+        Err(e) if e.is_revert() => {
+           let msg = e.get_revert_msg();
+           match msg {
+               Some(msg) => panic!("Reverted msg:{}", msg),
+               None => panic!("no revert msg. bytes: {}", e),
+           }
+        },
+        Err(e) => {
+            panic!("{:?}", e);
+        }
+    }
 
     println!(
         "Call as String: {}",

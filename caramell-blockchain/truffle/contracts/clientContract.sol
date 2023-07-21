@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Beerware
 pragma solidity >=0.4.22 <0.9.0;
 
+// TODO size + cost per r/w
 struct Data {
 	string name; //has to be unique
 	uint256 data;
@@ -13,6 +14,8 @@ struct Data_accounting {
 	int clientReadNumber;
 	int ownerReadNumber;
 }
+
+// TODO tx pay every few blocks
 
 // using mapping of hashs directly, since we store keys in list.
 // this way we are more mem efficient
@@ -32,7 +35,7 @@ contract clientContract {
 
 	modifier isStorer() {
 		require(_ownerStorer == msg.sender,
-					 "not owner");
+					 "not storer");
 		_;
 	}
 
